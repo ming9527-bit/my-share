@@ -119,14 +119,20 @@
 
         const colors = ['#ff6f61', '#ffcc00', '#6b5b95', '#88b04b', '#f7cac9', '#92a8d1', '#955251', '#b565a7'];
         confirmBtn.addEventListener('click', () => {
-            giftModal.classList.add('hidden');
-            music.play().catch(err => {
-                console.log('音乐播放需用户交互，已触发:', err);
-            });
-            setTimeout(() => {
-                music.pause();
-                music.currentTime = 0;
-            }, 32000);
+        giftModal.classList.add('hidden');
+        // 强制播放并处理错误
+        music.play().then(() => {
+            console.log('音乐播放成功');
+        }).catch(err => {
+            console.error('播放失败原因：', err);
+            // 手动提示用户（可选）
+            alert('请点击页面任意位置触发音乐播放');
+        });
+        // 保持原有的32秒后暂停逻辑
+        setTimeout(() => {
+            music.pause();
+            music.currentTime = 0;
+        }, 32000);
 
             // 标签
             tags.forEach((text, index) => {
@@ -197,4 +203,5 @@
         });
     </script>
 </body>
+
 </html>
