@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zq：万圣节快乐</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(135deg, #ff7e5f, #feb47b, #667eea); 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+        .gift-modal {
+            background: white;
+            padding: 30px 50px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+            text-align: center;
+            z-index: 100;
+        }
+        .gift-modal h1 {
+            color: #e63946;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .gift-btn {
+            background: #e63946;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .gift-btn:hover {
+            background: #c2185b;
+            transform: scale(1.05);
+        }
+        .tag {
+            position: absolute;
+            background: rgba(255,255,255,0.9);
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            font-size: 20px;
+            font-weight: bold;
+            color: #2d3748;
+            opacity: 0;
+            transition: all 0.5s;
+            transform: scale(0.8);
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <audio id="christmasMusic" loop>
+        <source src="./music2.mp3" type="audio/mpeg">
+        您的浏览器不支持音频播放
+    </audio>
+    <div class="gift-modal" id="giftModal">
+        <h1>🎃 你有一份万圣节礼物！</h1>
+        <button class="gift-btn" id="confirmBtn">点击查收</button>
+    </div>
+
+    <div id="tagContainer"></div>
+
+    <script>
+        const giftModal = document.getElementById('giftModal');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const tagContainer = document.getElementById('tagContainer');
+        const music = document.getElementById('christmasMusic');
+        const tags = [
+            "zq: 🎃记得多喝水，保持身体健康！",
+            "zq: 👻生活忙碌也要注意休息！",
+            "zq: 🍬早睡早起，养成良好的作息习惯！",
+            "zq: 🕸️适当运动，保持活力！",
+            "zq: 偶尔放松一下，给自己一点奖励！",
+            "zq: 记得吃早餐，开启美好的一天！",
+            "zq: 保持微笑，生活会更美好！",
+            "zq: 🎃 万圣节快乐，愿你充满欢笑与甜蜜！",
+            "zq: 👻 不给糖就捣蛋，愿你生活充满乐趣！",
+            "zq: 🍬 甜蜜的时光总是值得珍惜！",
+            "zq: 🕸️ 愿你的生活像蜘蛛网一样紧密相连！",
+            "zq: 记得给自己一些独处的时间，享受宁静！",
+            "zq: 多和家人朋友联系，感受温暖！",
+            "zq: 保持好奇心，探索生活的美好！",
+            "zq: 🎭 万圣节快乐，愿你生活充满戏剧性与惊喜！",
+            "zq: 🦉 夜晚的猫头鹰提醒你，注意休息！",
+            "zq: 适当放下手机，多看看身边的风景！",
+            "zq: 记得保持心情愉快，笑容是最好的装饰！",
+            "zq: 🧙‍♀️ 万圣节的魔法棒为你点亮幸福！",
+            "zq: 生活中的小确幸，值得我们去发现！",
+            "zq: 记得按时体检，关注自己的健康！",
+            "zq: 🎃 万圣节快乐，愿你的生活像南瓜灯一样明亮！",
+            "zq: 👻 想念你，愿万圣节带给你惊喜与欢乐！",
+            "zq: 记得保持饮食均衡，健康最重要！",
+            "zq: 多喝水，少喝含糖饮料，保持清爽！",
+            "zq: 每天抽出时间放松，缓解压力！",
+            "zq: 🎃适当晒晒太阳，补充维生素D！",
+            "zq: 👻记得微笑，传递正能量！",
+            "zq: 🍬生活中总有小确幸，别忘了发现它们！",
+            "zq: 🕸️规律作息，保持充足睡眠！",
+            "zq: 多吃水果蔬菜，增强免疫力！",
+            "zq: 生活中的小确幸，值得我们去发现！",
+            "zq: 记得按时体检，关注自己的健康！",
+            "zq: 🎃 万圣节快乐，愿你的生活像南瓜灯一样明亮！",
+            "zq: 👻 想念你，愿万圣节带给你惊喜与欢乐！",
+            "zq: 适当运动，保持身体灵活！",
+            "zq: 🎉 最后祝你万圣节快乐，愿你的生活充满幸福与惊喜！",
+            "zq: 你的笑容最好看了 😊😊"
+        ];
+
+        const colors = ['#ff6f61', '#ffcc00', '#6b5b95', '#88b04b', '#f7cac9', '#92a8d1', '#955251', '#b565a7'];
+        confirmBtn.addEventListener('click', () => {
+            giftModal.classList.add('hidden');
+            music.play().catch(err => {
+                console.log('音乐播放需用户交互，已触发:', err);
+            });
+            setTimeout(() => {
+                music.pause();
+                music.currentTime = 0;
+            }, 32000);
+
+            // 标签
+            tags.forEach((text, index) => {
+                setTimeout(() => {
+                    const tag = document.createElement('div');
+                    tag.className = 'tag';
+                    tag.textContent = text;
+                    // 随机颜色
+                    tag.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    // 随机位置
+                    const top = 5 + Math.random() * 80;
+                    const left = 5 + Math.random() * 80;
+                    tag.style.top = `${top}vh`;
+                    tag.style.left = `${left}vw`;
+                    tag.style.opacity = '1';
+                    tag.style.transform = 'scale(1)';
+                    tagContainer.appendChild(tag);
+
+                    // 标签动画
+                    tag.animate([
+                        { transform: 'scale(1)' },
+                        { transform: 'scale(1.05)' },
+                        { transform: 'scale(1)' }
+                    ], { duration: 1000, iterations: Infinity });
+
+                    // 最后清空所有标签
+                    if (index === tags.length - 1) {
+                        setTimeout(() => {
+                            const allTags = document.querySelectorAll('.tag');
+                            allTags.forEach((tag, i) => {
+                                setTimeout(() => {
+                                    tag.style.opacity = '0';
+                                    tag.style.transform = 'scale(0.8)';
+                                    setTimeout(() => tag.remove(), 400);
+                                }, i * 100);
+                            });
+
+                            // 显示最终祝福语
+                            setTimeout(() => {
+                                const finalTag = document.createElement('div');
+                                finalTag.className = 'tag';
+                                finalTag.style.position = 'fixed';
+                                finalTag.style.top = '50%';
+                                finalTag.style.left = '50%';
+                                finalTag.style.transform = 'translate(-50%, -50%)';
+                                finalTag.style.fontSize = '2.5rem';
+                                finalTag.style.backgroundColor = '#ff6f61';
+                                finalTag.style.opacity = '1';
+                                finalTag.style.padding = '20px 40px';
+                                finalTag.style.borderRadius = '15px';
+                                finalTag.style.width = '50%';
+                                finalTag.style.textAlign = 'center';
+                                tagContainer.appendChild(finalTag);
+
+                                const message = `zq: 你的笑容最好看了 😊😊<br><span style="font-size: 1rem; display: block; text-align: right; margin-top: 10px;">你的小伙伴: w</span>`;
+                                let i = 0;
+                                const interval = setInterval(() => {
+                                    finalTag.innerHTML = message.slice(0, ++i);
+                                    if (i === message.length) {
+                                        clearInterval(interval);
+                                    }
+                                }, 50);
+                            }, 1000);
+                        }, 2000);
+                    }
+                }, index * 450); 
+            });
+        });
+    </script>
+</body>
+</html>
