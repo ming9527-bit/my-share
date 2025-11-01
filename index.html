@@ -1,75 +1,117 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>zq：万圣节快乐</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: linear-gradient(135deg, #ff7e5f, #feb47b, #667eea); 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            justify-content: center; 
+        html, body { height: 100%; }
+        body {
+            background: linear-gradient(135deg, #ff7e5f, #feb47b, #667eea);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
             font-family: 'Arial', sans-serif;
+            padding: 20px;
         }
+
         .gift-modal {
             background: white;
-            padding: 30px 50px;
-            border-radius: 20px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.2);
+            padding: clamp(18px, 3.5vw, 30px) clamp(20px, 5vw, 50px);
+            border-radius: 18px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.18);
             text-align: center;
             z-index: 100;
+            width: min(92%, 560px);
         }
         .gift-modal h1 {
             color: #e63946;
-            margin-bottom: 20px;
-            font-size: 24px;
+            margin-bottom: 14px;
+            font-size: clamp(18px, 3.5vw, 26px);
+            line-height: 1.2;
         }
         .gift-btn {
             background: #e63946;
             color: white;
             border: none;
-            padding: 12px 30px;
+            padding: clamp(10px, 2.5vw, 14px) clamp(18px, 4vw, 30px);
             border-radius: 30px;
-            font-size: 18px;
+            font-size: clamp(16px, 3.5vw, 20px);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: transform .18s ease, background .18s ease;
+            touch-action: manipulation;
         }
-        .gift-btn:hover {
-            background: #c2185b;
-            transform: scale(1.05);
+        .gift-btn:hover { background: #c2185b; transform: scale(1.04); }
+        .hidden { display: none; }
+
+        #tagContainer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 50;
         }
         .tag {
             position: absolute;
-            background: rgba(255,255,255,0.9);
-            padding: 15px 25px;
-            border-radius: 50px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            font-size: 20px;
-            font-weight: bold;
+            background: rgba(255,255,255,0.95);
+            padding: clamp(8px, 2.5vw, 16px) clamp(12px, 3.5vw, 24px);
+            border-radius: 999px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+            font-size: clamp(12px, 3vw, 20px);
+            font-weight: 700;
             color: #2d3748;
             opacity: 0;
-            transition: all 0.5s;
-            transform: scale(0.8);
+            transition: transform .4s ease, opacity .4s ease;
+            transform: scale(.85);
+            max-width: min(84%, 360px);
+            word-break: break-word;
+            text-align: left;
+            pointer-events: none;
         }
-        .hidden { display: none; }
+
+        .final-tag {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%,-50%);
+            font-size: clamp(18px, 4vw, 32px);
+            background-color: #ff6f61;
+            color: #fff;
+            padding: clamp(12px, 3vw, 24px) clamp(16px, 4vw, 40px);
+            border-radius: 14px;
+            width: min(92%, 720px);
+            text-align: center;
+            z-index: 120;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+            overflow: visible;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .tag { transition: none; animation: none !important; }
+            .gift-btn { transition: none; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 12px; }
+            .gift-modal { padding: 16px; }
+            .final-tag { font-size: clamp(16px, 5vw, 22px); padding: 12px; }
+        }
     </style>
 </head>
 <body>
     <audio id="christmasMusic" loop>
-        <source src="./music2.mp3" type="audio/mpeg">
+        <source src="./music2.mp3" type="audio/mpeg" />
         您的浏览器不支持音频播放
     </audio>
+
     <div class="gift-modal" id="giftModal">
         <h1>🎃 你有一份万圣节礼物！</h1>
-        <button class="gift-btn" id="confirmBtn">点击查收</button>
+        <button class="gift-btn" id="confirmBtn" aria-label="查看礼物">点击查收</button>
     </div>
 
-    <div id="tagContainer"></div>
+    <div id="tagContainer" aria-hidden="true"></div>
 
     <script>
         const giftModal = document.getElementById('giftModal');
@@ -81,16 +123,16 @@
             "zq: 👻生活忙碌也要注意休息！",
             "zq: 🍬早睡早起，养成良好的作息习惯！",
             "zq: 🕸️适当运动，保持活力！",
-            "zq: 偶尔放松一下，给自己一点奖励！",
+            "zq: 😊偶尔放松一下，给自己一点奖励！",
             "zq: 记得吃早餐，开启美好的一天！",
             "zq: 保持微笑，生活会更美好！",
-            "zq: 🎃 万圣节快乐，愿你充满欢笑与甜蜜！",
-            "zq: 👻 不给糖就捣蛋，愿你生活充满乐趣！",
-            "zq: 🍬 甜蜜的时光总是值得珍惜！",
-            "zq: 🕸️ 愿你的生活像蜘蛛网一样紧密相连！",
-            "zq: 记得给自己一些独处的时间，享受宁静！",
-            "zq: 多和家人朋友联系，感受温暖！",
-            "zq: 保持好奇心，探索生活的美好！",
+            "zq: 🎃万圣节快乐，愿你充满欢笑与甜蜜！",
+            "zq: 👻不给糖就捣蛋，愿你生活充满乐趣！",
+            "zq: 🍬甜蜜的时光总是值得珍惜！",
+            "zq: 🕸️愿你的生活像蜘蛛网一样紧密相连！",
+            "zq: 🍬记得给自己一些独处的时间，享受宁静！",
+            "zq: 🕸️多和家人朋友联系，感受温暖！",
+            "zq: 😊保持好奇心，探索生活的美好！",
             "zq: 🎭 万圣节快乐，愿你生活充满戏剧性与惊喜！",
             "zq: 🦉 夜晚的猫头鹰提醒你，注意休息！",
             "zq: 适当放下手机，多看看身边的风景！",
@@ -101,14 +143,14 @@
             "zq: 🎃 万圣节快乐，愿你的生活像南瓜灯一样明亮！",
             "zq: 👻 想念你，愿万圣节带给你惊喜与欢乐！",
             "zq: 记得保持饮食均衡，健康最重要！",
-            "zq: 多喝水，少喝含糖饮料，保持清爽！",
+            "zq: 🐱多喝水，少喝含糖饮料，保持清爽！",
             "zq: 每天抽出时间放松，缓解压力！",
             "zq: 🎃适当晒晒太阳，补充维生素D！",
             "zq: 👻记得微笑，传递正能量！",
             "zq: 🍬生活中总有小确幸，别忘了发现它们！",
             "zq: 🕸️规律作息，保持充足睡眠！",
             "zq: 多吃水果蔬菜，增强免疫力！",
-            "zq: 生活中的小确幸，值得我们去发现！",
+            "zq: 🐶生活中的小确幸，值得我们去发现！",
             "zq: 记得按时体检，关注自己的健康！",
             "zq: 🎃 万圣节快乐，愿你的生活像南瓜灯一样明亮！",
             "zq: 👻 想念你，愿万圣节带给你惊喜与欢乐！",
@@ -118,85 +160,120 @@
         ];
 
         const colors = ['#ff6f61', '#ffcc00', '#6b5b95', '#88b04b', '#f7cac9', '#92a8d1', '#955251', '#b565a7'];
+
+        function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+        function typeText(element, text, speed) {
+            return new Promise(resolve => {
+                const chars = Array.from(text);
+                let i = 0;
+                element.textContent = '';
+                const id = setInterval(() => {
+                    element.textContent += chars[i];
+                    i++;
+                    if (i >= chars.length) {
+                        clearInterval(id);
+                        resolve();
+                    }
+                }, speed);
+            });
+        }
+
         confirmBtn.addEventListener('click', () => {
             giftModal.classList.add('hidden');
-            music.play().catch(err => {
-                console.log('音乐播放需用户交互，已触发:', err);
-            });
-            setTimeout(() => {
-                music.pause();
-                music.currentTime = 0;
-            }, 32000);
 
-            // 标签
+            music.play().catch(() => { /* 浏览器限制，忽略错误 */ });
+            setTimeout(() => { music.pause(); music.currentTime = 0; }, 32000);
+
             tags.forEach((text, index) => {
                 setTimeout(() => {
                     const tag = document.createElement('div');
                     tag.className = 'tag';
                     tag.textContent = text;
-                    // 随机颜色
                     tag.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    // 随机位置
+
                     const top = 5 + Math.random() * 80;
                     const left = 5 + Math.random() * 80;
-                    tag.style.top = `${top}vh`;
-                    tag.style.left = `${left}vw`;
-                    tag.style.opacity = '1';
-                    tag.style.transform = 'scale(1)';
+                    tag.style.top = `${top}%`;
+                    tag.style.left = `${left}%`;
                     tagContainer.appendChild(tag);
 
-                    // 标签动画
-                    tag.animate([
-                        { transform: 'scale(1)' },
-                        { transform: 'scale(1.05)' },
-                        { transform: 'scale(1)' }
-                    ], { duration: 1000, iterations: Infinity });
+                    requestAnimationFrame(() => {
+                        tag.style.opacity = '1';
+                        tag.style.transform = 'scale(1)';
+                    });
 
-                    // 最后清空所有标签
+                    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                        tag.animate(
+                            [{ transform: 'scale(1)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }],
+                            { duration: 1200 + Math.random() * 800, iterations: Infinity }
+                        );
+                    }
+
                     if (index === tags.length - 1) {
-                        setTimeout(() => {
+                        setTimeout(async () => {
                             const allTags = document.querySelectorAll('.tag');
-                            allTags.forEach((tag, i) => {
+                            allTags.forEach((t, i) => {
                                 setTimeout(() => {
-                                    tag.style.opacity = '0';
-                                    tag.style.transform = 'scale(0.8)';
-                                    setTimeout(() => tag.remove(), 400);
-                                }, i * 100);
+                                    t.style.opacity = '0';
+                                    t.style.transform = 'scale(.8)';
+                                    setTimeout(() => t.remove(), 420);
+                                }, i * 80);
                             });
 
-                            // 显示最终祝福语
-                            setTimeout(() => {
-                                const finalTag = document.createElement('div');
-                                finalTag.className = 'tag';
-                                finalTag.style.position = 'fixed';
-                                finalTag.style.top = '50%';
-                                finalTag.style.left = '50%';
-                                finalTag.style.transform = 'translate(-50%, -50%)';
-                                finalTag.style.fontSize = '2.5rem';
-                                finalTag.style.backgroundColor = '#ff6f61';
-                                finalTag.style.opacity = '1';
-                                finalTag.style.padding = '20px 40px';
-                                finalTag.style.borderRadius = '15px';
-                                finalTag.style.width = '50%';
-                                finalTag.style.textAlign = 'center';
-                                tagContainer.appendChild(finalTag);
+                            await sleep(600);
 
-                                const message = `zq: 你的笑容最好看了 😊😊<br><span style="font-size: 1rem; display: block; text-align: right; margin-top: 10px;">你的小伙伴: w</span>`;
-                                let i = 0;
-                                const interval = setInterval(() => {
-                                    finalTag.innerHTML = message.slice(0, ++i);
-                                    if (i === message.length) {
-                                        clearInterval(interval);
-                                    }
-                                }, 50);
-                            }, 1000);
-                        }, 2000);
+                            const finalTag = document.createElement('div');
+                            finalTag.className = 'final-tag';
+
+                            const mainSpan = document.createElement('div');
+                            mainSpan.style.display = 'block';
+                            mainSpan.style.whiteSpace = 'pre-wrap';
+                            mainSpan.style.wordBreak = 'break-word';
+
+                            const smallSpan = document.createElement('span');
+                            smallSpan.style.fontSize = '0.7em';
+                            smallSpan.style.display = 'block';
+                            smallSpan.style.marginTop = '8px';
+                            smallSpan.style.opacity = '0';
+                            smallSpan.style.transition = 'opacity .3s ease';
+                            smallSpan.textContent = '';
+
+                            finalTag.appendChild(mainSpan);
+                            finalTag.appendChild(smallSpan);
+                            tagContainer.appendChild(finalTag);
+
+                            finalTag.style.opacity = '0';
+                            finalTag.style.transition = 'opacity .6s ease';
+                            requestAnimationFrame(() => { finalTag.style.opacity = '1'; });
+
+                            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                            const mainText = 'zq: 你的笑容最好看了 😊😊';
+                            const smallText = '你的小伙伴: w';
+                            const speed = prefersReduced ? 0 : 60;
+
+                            if (prefersReduced) {
+                                mainSpan.textContent = mainText;
+                                smallSpan.textContent = smallText;
+                                smallSpan.style.opacity = '0.95';
+                                setTimeout(() => {
+                                    finalTag.style.opacity = '0';
+                                    setTimeout(() => finalTag.remove(), 600);
+                                }, 6000);
+                            } else {
+                                await typeText(mainSpan, mainText, speed);
+                                await sleep(1500);
+                                smallSpan.style.opacity = '0.95';
+                                await typeText(smallSpan, smallText, speed);
+                                setTimeout(() => {
+                                    finalTag.style.opacity = '0';
+                                    setTimeout(() => finalTag.remove(), 600);
+                                }, 6000);
+                            }
+                        }, 1800);
                     }
-                }, index * 450); 
+                }, index * 380);
             });
         });
     </script>
 </body>
-
 </html>
-
